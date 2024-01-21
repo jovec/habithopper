@@ -27,10 +27,45 @@ class RegistrationTest extends TestCase
 
         $response = $this->post('/api/login', [
             'email' => $user->email,
-            'password' => 'rooster',
+            'password' => $password,
             'device_name' => 'test-device'
         ]);
 
         $response->assertStatus(200);
+    }
+
+    public function test_user_cannot_register_without_email()
+    {
+        $response = $this->post('/api/register', [
+            'name' => 'Test User',
+            'email' => ' ',
+            'password' => 'password'
+        ]);
+
+        $response->assertStatus(302);
+    }
+
+    public function test_user_cannot_register_with_short_password()
+    {
+        $response = $this->post('/api/register', [
+            'name' => 'Test User',
+            'email' => ' ',
+            'password' => 'pass'
+        ]);
+
+        $response->assertStatus(302);
+    }
+
+    public function test_user_cannot_register_with_duplicate_email()
+    {
+        $user = User::factory()->create(['email' => 'test@gmail.com']);
+
+        $response = $this->post('/api/register', [
+            'name' => 'Test User',
+            'email' => $user->email,
+            'password' => 'password'
+        ]);
+
+        $response->assertStatus(302);
     }
 }
